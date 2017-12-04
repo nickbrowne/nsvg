@@ -1,0 +1,11 @@
+[package]
+name = "nsvg"
+version = "0.1.0"
+authors = ["nickbrowne <nickbrowne@users.noreply.github.com>"]
+
+[dependencies]
+image = "0.18.0"
+
+[build-dependencies]
+bindgen = "0.26.3"
+cc = "1.0"
