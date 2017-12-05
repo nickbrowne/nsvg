@@ -29,18 +29,18 @@ let image = nsvg::rasterize(svg);
 
 ```
 
+# Developing
+
+Make sure you have `libclang-dev` so bindgen works.
+
+`cargo test` to run tests.
+
 There is one provided example, which you can run with the following command:
 ```
 cargo run --example svg_to_png
 ```
 
 This will convert the `spiral.svg` vector into a PNG. The PNG will be written to the working directory as `spiral_output.png`.
-
-# Developing
-
-Make sure you have `libclang-dev` so bindgen works.
-
-`cargo test` to run tests.
 
 # License
 
