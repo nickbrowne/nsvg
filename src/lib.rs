@@ -37,8 +37,21 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
   let stride = w * 4;
 
   unsafe {
+    // Not sure if we care about reusing this or not...
     let r = nsvgCreateRasterizer();
-    nsvgRasterize(r, image, tx, ty, scale as f32, dst.as_mut_ptr(), w as i32, h as i32, stride as i32);
+
+    nsvgRasterize(      // Rasterizes SVG image, returns RGBA image (non-premultiplied alpha)
+      r,                //   r - pointer to rasterizer context
+      image,            //   image - pointer to image to rasterize
+      tx, ty,           //   tx,ty - image offset (applied after scaling)
+      scale as f32,     //   scale - image scale
+      dst.as_mut_ptr(), //   dst - pointer to destination image data, 4 bytes per pixel (RGBA)
+      w as i32,         //   w - width of the image to render
+      h as i32,         //   h - height of the image to render
+      stride as i32     //   stride - number of bytes per scaleline in the destination buffer
+    );
+
+    // Need to manually set the length of the vector to match the data that's been put in it
     dst.set_len(capacity);
   }
 
