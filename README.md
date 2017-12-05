@@ -19,7 +19,7 @@ Include `nsvg` in your `Cargo.toml` dependencies.
 nsvg = "0.1.0"
 ```
 
-Now you can parse and rasterize SVGs. You can use the scale argument to producer larger or smaller rasterised images. The aspect ratio will remain the same.
+Now you can parse and rasterize SVGs. Use the scale argument to producer larger or smaller rasterised images. The aspect ratio will remain the same.
 
 This can be useful to create rasters to suit high resolution displays.
 
