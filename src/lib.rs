@@ -12,6 +12,8 @@ use std::path::Path;
 
 use bindings::NSVGimage;
 
+const BYTES_PER_PIXEL: usize = 4;
+
 pub fn parse_file(filename: &str, units: &str, dpi: f32) -> *mut NSVGimage {
   use bindings::nsvgParseFromFile;
 
@@ -29,9 +31,9 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
 
   let w = 256;
   let h = 256;
-  let capacity = w * h * 4;
+  let capacity = w * h * BYTES_PER_PIXEL;
   let mut dst = Vec::with_capacity(capacity);
-  let stride = w * 4;
+  let stride = w * BYTES_PER_PIXEL;
 
   unsafe {
     // Not sure if we care about reusing this or not...
