@@ -9,7 +9,6 @@ mod bindings {
 extern crate image;
 
 use std::ffi::CString;
-use std::path::Path;
 
 use bindings::NSVGimage;
 
