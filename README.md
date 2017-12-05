@@ -2,7 +2,7 @@
 
 A friendly Rust wrapper around the excellent NanoSVG C library. Offering simple SVG parsing and rasterizing.
 
-Does not provide all the functionality of NanoSVG yet. Just the bare minimum to rasterize SVGs.
+Does not provide all the functionality of NanoSVG yet. Just the bare minimum to create scaled rasters of SVGs.
 
 Like NanoSVG, the rasteriser only renders flat filled shapes. It is not particularly fast or accurate, but it is a simple way to bake vector graphics into textures.
 
