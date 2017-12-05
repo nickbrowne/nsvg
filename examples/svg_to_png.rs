@@ -2,7 +2,6 @@ extern crate nsvg;
 extern crate image;
 
 use std::env;
-use std::path::PathBuf;
 
 fn main() {
   // Load the SVG data
