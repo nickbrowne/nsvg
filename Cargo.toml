@@ -2,6 +2,10 @@
 name = "nsvg"
 version = "0.1.0"
 authors = ["nickbrowne <nickbrowne@users.noreply.github.com>"]
+repository = "https://github.com/nickbrowne/nsvg"
+keywords = ["svg"]
+description = "A simple SVG parser and rasterizer using NanoSVG"
+license = "Zlib/MIT"
 
 [dependencies]
 image = "0.18.0"
