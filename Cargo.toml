@@ -6,6 +6,7 @@ repository = "https://github.com/nickbrowne/nsvg"
 keywords = ["svg"]
 description = "A simple SVG parser and rasterizer using NanoSVG"
 license = "Zlib/MIT"
+readme = "README.md"
 
 [dependencies]
 image = "0.18.0"
