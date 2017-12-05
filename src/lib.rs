@@ -25,15 +25,15 @@ pub fn parse_file(filename: &str, units: &str, dpi: f32) -> *mut NSVGimage {
   }
 }
 
-pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
+pub fn rasterize(image: *mut NSVGimage, scale: f32) -> image::RgbaImage {
   use bindings::nsvgCreateRasterizer;
   use bindings::nsvgRasterize;
 
-  let w = 256;
-  let h = 256;
-  let capacity = w * h * BYTES_PER_PIXEL;
+  let width = unsafe { (*image).width * scale } as usize;
+  let height = unsafe { (*image).height * scale } as usize;
+  let capacity = BYTES_PER_PIXEL * width * height;
   let mut dst = Vec::with_capacity(capacity);
-  let stride = w * BYTES_PER_PIXEL;
+  let stride = width * BYTES_PER_PIXEL;
 
   unsafe {
     // Not sure if we care about reusing this or not...
@@ -43,10 +43,10 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
       r,                //   r - pointer to rasterizer context
       image,            //   image - pointer to image to rasterize
       0.0, 0.0,         //   tx,ty - image offset (applied after scaling)
-      1.0,              //   scale - image scale
+      scale,            //   scale - image scale
       dst.as_mut_ptr(), //   dst - pointer to destination image data, 4 bytes per pixel (RGBA)
-      w as i32,         //   w - width of the image to render
-      h as i32,         //   h - height of the image to render
+      width as i32,     //   w - width of the image to render
+      height as i32,    //   h - height of the image to render
       stride as i32     //   stride - number of bytes per scaleline in the destination buffer
     );
 
@@ -54,7 +54,7 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
     dst.set_len(capacity);
   }
 
-  image::RgbaImage::from_raw(w as u32, h as u32, dst).unwrap()
+  image::RgbaImage::from_raw(width as u32, height as u32, dst).unwrap()
 }
 
 
@@ -75,9 +75,17 @@ mod tests {
   #[test]
   fn can_rasterize() {
     let svg = parse_file("examples/spiral.svg", "px", 72.0);
-    let image = rasterize(svg);
+    let image = rasterize(svg, 1.0);
 
     assert_eq!(image.dimensions(), (256, 256));
+  }
+
+  #[test]
+  fn can_rasterize_and_scale() {
+    let svg = parse_file("examples/spiral.svg", "px", 72.0);
+    let image = rasterize(svg, 2.0);
+
+    assert_eq!(image.dimensions(), (512, 512));
   }
 }
 

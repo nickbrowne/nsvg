@@ -8,7 +8,7 @@ fn main() {
   let svg = nsvg::parse_file("examples/spiral.svg", "px", 72.0);
 
   // Rasterize the loaded SVG and return an RgbaImage
-  let image = nsvg::rasterize(svg);
+  let image = nsvg::rasterize(svg, 2.0);
 
   let save_path = env::current_dir().unwrap().join("spiral_output.png");
   let (width, height) = image.dimensions();
