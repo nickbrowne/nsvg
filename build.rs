@@ -7,6 +7,7 @@ use std::path::PathBuf;
 fn main() {
   cc::Build::new()
     .file("lib/nanosvg.c")
+    .warnings(false)
     .compile("nanosvg");
 
   let bindings = bindgen::Builder::default()
