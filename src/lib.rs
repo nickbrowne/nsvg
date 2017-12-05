@@ -27,12 +27,9 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
   use bindings::nsvgCreateRasterizer;
   use bindings::nsvgRasterize;
 
-  let tx = 0.0;
-  let ty = 0.0;
   let w = 256;
   let h = 256;
-  let scale = 1;
-  let capacity = w * scale * h * scale * 4;
+  let capacity = w * h * 4;
   let mut dst = Vec::with_capacity(capacity);
   let stride = w * 4;
 
@@ -43,8 +40,8 @@ pub fn rasterize(image: *mut NSVGimage) -> image::RgbaImage {
     nsvgRasterize(      // Rasterizes SVG image, returns RGBA image (non-premultiplied alpha)
       r,                //   r - pointer to rasterizer context
       image,            //   image - pointer to image to rasterize
-      tx, ty,           //   tx,ty - image offset (applied after scaling)
-      scale as f32,     //   scale - image scale
+      0.0, 0.0,         //   tx,ty - image offset (applied after scaling)
+      1.0,              //   scale - image scale
       dst.as_mut_ptr(), //   dst - pointer to destination image data, 4 bytes per pixel (RGBA)
       w as i32,         //   w - width of the image to render
       h as i32,         //   h - height of the image to render
