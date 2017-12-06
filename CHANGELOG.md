@@ -1,3 +1,6 @@
+## 0.3.0
+ - Upgrade to latest NanoSVG
+
 ## 0.2.1
  - Fixed some documentation and examples
 
