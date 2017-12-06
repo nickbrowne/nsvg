@@ -24,13 +24,44 @@ impl <T> ::std::fmt::Debug for __BindgenUnionField<T> {
         fmt.write_str("__BindgenUnionField")
     }
 }
-pub const NSVG_PAINT_NONE: ::std::os::raw::c_uint = 0;
-pub const NSVG_PAINT_COLOR: ::std::os::raw::c_uint = 1;
-pub const NSVG_PAINT_LINEAR_GRADIENT: ::std::os::raw::c_uint = 2;
-pub const NSVG_PAINT_RADIAL_GRADIENT: ::std::os::raw::c_uint = 3;
-pub const NSVG_SPREAD_PAD: ::std::os::raw::c_uint = 0;
-pub const NSVG_SPREAD_REFLECT: ::std::os::raw::c_uint = 1;
-pub const NSVG_SPREAD_REPEAT: ::std::os::raw::c_uint = 2;
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGpaintType {
+    NSVG_PAINT_NONE = 0,
+    NSVG_PAINT_COLOR = 1,
+    NSVG_PAINT_LINEAR_GRADIENT = 2,
+    NSVG_PAINT_RADIAL_GRADIENT = 3,
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGspreadType {
+    NSVG_SPREAD_PAD = 0,
+    NSVG_SPREAD_REFLECT = 1,
+    NSVG_SPREAD_REPEAT = 2,
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGlineJoin {
+    NSVG_JOIN_MITER = 0,
+    NSVG_JOIN_ROUND = 1,
+    NSVG_JOIN_BEVEL = 2,
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGlineCap {
+    NSVG_CAP_BUTT = 0,
+    NSVG_CAP_ROUND = 1,
+    NSVG_CAP_SQUARE = 2,
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGfillRule {
+    NSVG_FILLRULE_NONZERO = 0,
+    NSVG_FILLRULE_EVENODD = 1,
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum NSVGflags { NSVG_FLAGS_VISIBLE = 1, }
 #[repr(C)]
 #[derive(Debug, Copy)]
 pub struct NSVGgradientStop {
@@ -202,60 +233,110 @@ impl Clone for NSVGpath {
     fn clone(&self) -> Self { *self }
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
 pub struct NSVGshape {
+    pub id: [::std::os::raw::c_char; 64usize],
     pub fill: NSVGpaint,
     pub stroke: NSVGpaint,
     pub opacity: f32,
     pub strokeWidth: f32,
+    pub strokeDashOffset: f32,
+    pub strokeDashArray: [f32; 8usize],
+    pub strokeDashCount: ::std::os::raw::c_char,
+    pub strokeLineJoin: ::std::os::raw::c_char,
+    pub strokeLineCap: ::std::os::raw::c_char,
+    pub miterLimit: f32,
+    pub fillRule: ::std::os::raw::c_char,
+    pub flags: ::std::os::raw::c_uchar,
     pub bounds: [f32; 4usize],
     pub paths: *mut NSVGpath,
     pub next: *mut NSVGshape,
 }
 #[test]
 fn bindgen_test_layout_NSVGshape() {
-    assert_eq!(::std::mem::size_of::<NSVGshape>() , 72usize , concat ! (
+    assert_eq!(::std::mem::size_of::<NSVGshape>() , 184usize , concat ! (
                "Size of: " , stringify ! ( NSVGshape ) ));
     assert_eq! (::std::mem::align_of::<NSVGshape>() , 8usize , concat ! (
                 "Alignment of " , stringify ! ( NSVGshape ) ));
     assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . id as * const _ as usize
+                } , 0usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( id ) ));
+    assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . fill as * const _ as
-                usize } , 0usize , concat ! (
+                usize } , 64usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( fill ) ));
     assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . stroke as * const _ as
-                usize } , 16usize , concat ! (
+                usize } , 80usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( stroke ) ));
     assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . opacity as * const _ as
-                usize } , 32usize , concat ! (
+                usize } , 96usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( opacity ) ));
     assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . strokeWidth as * const _
-                as usize } , 36usize , concat ! (
+                as usize } , 100usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( strokeWidth ) ));
     assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . strokeDashOffset as *
+                const _ as usize } , 104usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( strokeDashOffset ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . strokeDashArray as *
+                const _ as usize } , 108usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( strokeDashArray ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . strokeDashCount as *
+                const _ as usize } , 140usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( strokeDashCount ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . strokeLineJoin as * const
+                _ as usize } , 141usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( strokeLineJoin ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . strokeLineCap as * const
+                _ as usize } , 142usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( strokeLineCap ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . miterLimit as * const _
+                as usize } , 144usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( miterLimit ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . fillRule as * const _ as
+                usize } , 148usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( fillRule ) ));
+    assert_eq! (unsafe {
+                & ( * ( 0 as * const NSVGshape ) ) . flags as * const _ as
+                usize } , 149usize , concat ! (
+                "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
+                stringify ! ( flags ) ));
+    assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . bounds as * const _ as
-                usize } , 40usize , concat ! (
+                usize } , 152usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( bounds ) ));
     assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . paths as * const _ as
-                usize } , 56usize , concat ! (
+                usize } , 168usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( paths ) ));
     assert_eq! (unsafe {
                 & ( * ( 0 as * const NSVGshape ) ) . next as * const _ as
-                usize } , 64usize , concat ! (
+                usize } , 176usize , concat ! (
                 "Alignment of field: " , stringify ! ( NSVGshape ) , "::" ,
                 stringify ! ( next ) ));
-}
-impl Clone for NSVGshape {
-    fn clone(&self) -> Self { *self }
 }
 #[repr(C)]
 #[derive(Debug, Copy)]
