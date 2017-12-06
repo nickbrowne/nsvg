@@ -40,7 +40,7 @@ By default nsvg will use prebuilt FFI bindings, but you can regenerate them manu
 cargo build --features bindgen
 ```
 
-Which will also copy the bindings into the `src` directory. If the bindings need to be changed (when upgrading NanoSVG, for example) the prebuilt bindings should be checked in to version control.
+Which will also copy the bindings into the `src` directory. If the bindings need to be updated (when upgrading NanoSVG, for example) they should be checked in to version control.
 
 Make sure you have `libclang-dev` available so bindgen works.
 
