@@ -12,5 +12,5 @@ readme = "README.md"
 image = "0.18.0"
 
 [build-dependencies]
-bindgen = "0.26.3"
+bindgen = { version = "0.26.3", optional = true }
 cc = "1.0"
