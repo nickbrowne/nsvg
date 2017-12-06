@@ -16,7 +16,7 @@ Include `nsvg` in your `Cargo.toml` dependencies.
 
 ```toml
 [dependencies]
-nsvg = "0.2.0"
+nsvg = "0.2.1"
 ```
 
 Now you can parse and rasterize SVGs. Use the scale argument to producer larger or smaller rasterised images. The aspect ratio will remain the same.
@@ -26,7 +26,7 @@ This can be useful to create rasters to suit high resolution displays.
 ```rust
 extern crate nsvg;
 
-let svg = nsvg::parse_file("my.svg", "px", 72.0);
+let svg = nsvg::parse_file("my.svg", "px", 96.0);
 let scale = 2.0;
 let image = nsvg::rasterize(svg, scale);
 

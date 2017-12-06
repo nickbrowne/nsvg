@@ -64,7 +64,7 @@ mod tests {
 
   #[test]
   fn can_parse_file() {
-    let svg = parse_file("examples/spiral.svg", "px", 72.0);
+    let svg = parse_file("examples/spiral.svg", "px", 96.0);
 
     unsafe {
       assert_eq!((*svg).width, 256.0);
@@ -74,7 +74,7 @@ mod tests {
 
   #[test]
   fn can_rasterize() {
-    let svg = parse_file("examples/spiral.svg", "px", 72.0);
+    let svg = parse_file("examples/spiral.svg", "px", 96.0);
     let image = rasterize(svg, 1.0);
 
     assert_eq!(image.dimensions(), (256, 256));
@@ -82,7 +82,7 @@ mod tests {
 
   #[test]
   fn can_rasterize_and_scale() {
-    let svg = parse_file("examples/spiral.svg", "px", 72.0);
+    let svg = parse_file("examples/spiral.svg", "px", 96.0);
     let image = rasterize(svg, 2.0);
 
     assert_eq!(image.dimensions(), (512, 512));
