@@ -1,4 +1,4 @@
-# NSVG
+# nsvg
 
 A friendly Rust wrapper around the excellent NanoSVG C library. Offering simple SVG parsing and rasterizing.
 
@@ -10,7 +10,7 @@ https://github.com/memononen/nanosvg
 
 https://github.com/rezrov/libnanosvg
 
-# Usage
+## Usage
 
 Include `nsvg` in your `Cargo.toml` dependencies.
 
@@ -32,7 +32,7 @@ let image = nsvg::rasterize(svg, scale);
 
 ```
 
-# Developing
+## Developing
 
 By default nsvg will use prebuilt FFI bindings, but you can regenerate them manually by running:
 
@@ -53,7 +53,7 @@ cargo run --example svg_to_png
 
 This will convert the `spiral.svg` vector into a PNG. The PNG will be written to the working directory as `spiral_output.png`.
 
-# License
+## License
 
 NanoSVG is licensed under [zlib license](lib/LICENSE.txt)
 
