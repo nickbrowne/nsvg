@@ -1,3 +1,7 @@
+## 0.3.1
+ - Added CI
+ - Fixed some documentation formatting
+
 ## 0.3.0
  - Upgrade to latest NanoSVG
 
