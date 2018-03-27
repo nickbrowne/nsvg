@@ -1,4 +1,4 @@
-# nsvg
+# nsvg [![Build Status](https://travis-ci.org/nickbrowne/nsvg.svg?branch=master)](https://travis-ci.org/nickbrowne/nsvg)
 
 A friendly Rust wrapper around the excellent NanoSVG C library. Offering simple SVG parsing and rasterizing.
 
