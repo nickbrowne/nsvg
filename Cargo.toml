@@ -1,6 +1,6 @@
 [package]
 name = "nsvg"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Nick Browne <nickbrowne@users.noreply.github.com>"]
 repository = "https://github.com/nickbrowne/nsvg"
 keywords = ["svg", "nanosvg"]

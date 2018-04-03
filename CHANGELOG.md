@@ -1,3 +1,6 @@
+## 0.3.2
+ - Add CI badge to Cargo.toml
+
 ## 0.3.1
  - Added CI
  - Fixed some documentation formatting
