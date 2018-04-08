@@ -1,3 +1,27 @@
+/*!
+A friendly Rust wrapper around the excellent NanoSVG C library. Offering
+simple SVG parsing and rasterizing.
+
+# Example
+
+```
+extern crate nsvg;
+
+use std::path::Path;
+
+fn main() {
+  let path = Path::new("examples/spiral.svg");
+
+  // Load and parse the svg
+  let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
+
+  // Create a scaled raster
+  let scale = 2.0;
+  let image = svg.rasterize(scale);
+}
+```
+*/
+
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
@@ -87,6 +111,14 @@ pub struct SvgImage {
 }
 
 impl SvgImage {
+  /**
+   * Loads SVG data from a file at the given `Path`.
+   *
+   * # Arguments
+   * - `svg_path` - Path to the SVG you want to load
+   * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
+   * - `dpi` - Probably just want `96.0`.
+   */
   pub fn parse_file(svg_path: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
     let file = File::open(svg_path)?;
     let mut buf_reader = BufReader::new(file);
@@ -108,12 +140,22 @@ impl SvgImage {
     }
   }
 
+  /**
+   * Turns the loaded SVG into an RgbaImage bitmap
+   *
+   * # Argument
+   * - `scale` - The factor the vector will be scaled by when rasterizing.
+   * 1.0 is the original size.
+   */
   pub fn rasterize(&self, scale: f32) -> Result<image::RgbaImage, Error> {
     let rasterizer = SVGRasterizer::new()?;
 
     rasterizer.rasterize(self, scale)
   }
 
+  /**
+   * The width of the original SVG document.
+   */
   pub fn width(&self) -> f32 {
     if self.image.is_null() {
       panic!("NSVGimage pointer is unexpectedly null!");
@@ -122,6 +164,9 @@ impl SvgImage {
     }
   }
 
+  /**
+   * The height of the original SVG document.
+   */
   pub fn height(&self) -> f32 {
     if self.image.is_null() {
       panic!("NSVGimage pointer is unexpectedly null!");
@@ -140,6 +185,14 @@ impl Drop for SvgImage {
   }
 }
 
+/**
+ * Loads SVG data from a file at the given `Path`.
+ *
+ * # Arguments
+ * - `svg_path` - Path to the SVG you want to load
+ * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
+ * - `dpi` - Probably just want `96.0`.
+ */
 pub fn parse_file(filename: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
   SvgImage::parse_file(filename, units, dpi)
 }
