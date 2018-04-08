@@ -5,13 +5,19 @@
 mod bindings;
 
 extern crate image;
+#[cfg(test)]
+extern crate tempfile;
 
 use std::ffi::CString;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::path::Path;
 
 const BYTES_PER_PIXEL: usize = 4;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Error {
+  IoError(std::io::Error),
   NulError(std::ffi::NulError),
   ParseError,
   MallocError,
@@ -24,9 +30,16 @@ impl From<std::ffi::NulError> for Error {
     }
 }
 
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Error::IoError(error)
+    }
+}
+
 impl std::error::Error for Error {
   fn description(&self) -> &str {
     match *self {
+      Error::IoError(ref e) => e.description(),
       Error::NulError(ref e) => e.description(),
       Error::ParseError => "An unknown parsing error",
       Error::MallocError => "Failed to allocate memory",
@@ -38,6 +51,7 @@ impl std::error::Error for Error {
 impl std::fmt::Display for Error {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     match *self {
+      Error::IoError(ref e) => e.fmt(f),
       Error::NulError(ref e) => e.fmt(f),
       Error::ParseError => write!(f, "An unknown parsing error"),
       Error::MallocError => write!(f, "Failed to allocate memory"),
@@ -73,11 +87,18 @@ pub struct SvgImage {
 }
 
 impl SvgImage {
-  pub fn parse_file(filename: &str, units: Units, dpi: f32) -> Result<SvgImage, Error> {
-    let filename_chars = CString::new(filename)?;
+  pub fn parse_file(svg_path: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+    let file = File::open(svg_path)?;
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = Vec::new();
+    buf_reader.read_to_end(&mut contents)?;
+
+    let svg_c_string = CString::new(contents)?.into_raw();
 
     let image = unsafe {
-      bindings::nsvgParseFromFile(filename_chars.as_ptr(), units.as_c_str(), dpi)
+      let image = bindings::nsvgParse(svg_c_string, units.as_c_str(), dpi);
+      CString::from_raw(svg_c_string);
+      image
     };
 
     if image.is_null() {
@@ -119,7 +140,7 @@ impl Drop for SvgImage {
   }
 }
 
-pub fn parse_file(filename: &str, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+pub fn parse_file(filename: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
   SvgImage::parse_file(filename, units, dpi)
 }
 
@@ -179,17 +200,36 @@ impl Drop for SVGRasterizer {
 mod tests {
   use super::*;
 
+  use std::fs::copy;
+  use std::io::Write;
+  use tempfile::{NamedTempFile, tempdir};
+
   #[test]
   fn can_parse_file() {
-    let svg = SvgImage::parse_file("examples/spiral.svg", Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
 
     assert_eq!(svg.width(), 256.0);
     assert_eq!(svg.height(), 256.0);
   }
 
   #[test]
-  fn error_when_parsing_a_file_path_containing_nul() {
-    let svg = SvgImage::parse_file("examples/spiral.svg\x00", Units::Pixel, 96.0);
+  fn can_parse_file_at_non_ascii_path() {
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("spìral.svg");
+    copy(Path::new("examples/spiral.svg"), &path).unwrap();
+
+    let svg = SvgImage::parse_file(&path, Units::Pixel, 96.0).unwrap();
+
+    assert_eq!(svg.width(), 256.0);
+    assert_eq!(svg.height(), 256.0);
+  }
+
+  #[test]
+  fn error_when_parsing_an_svg_file_containing_nul() {
+    let mut file = NamedTempFile::new().unwrap();
+    writeln!(file, "\0").unwrap();
+
+    let svg = SvgImage::parse_file(file.path(), Units::Pixel, 96.0);
 
     let is_nul_error = match svg {
       Err(Error::NulError(_)) => true,
@@ -201,10 +241,10 @@ mod tests {
 
   #[test]
   fn error_when_parsing_a_file_path_that_does_not_exist() {
-    let svg = SvgImage::parse_file("examples/missing.svg", Units::Pixel, 96.0);
+    let svg = SvgImage::parse_file(Path::new("examples/missing.svg"), Units::Pixel, 96.0);
 
     let is_parse_error = match svg {
-      Err(Error::ParseError) => true,
+      Err(Error::IoError(_)) => true,
       _ => false,
     };
 
@@ -213,7 +253,7 @@ mod tests {
 
   #[test]
   fn can_rasterize() {
-    let svg = SvgImage::parse_file("examples/spiral.svg", Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(1.0).unwrap();
 
     assert_eq!(image.dimensions(), (256, 256));
@@ -221,7 +261,7 @@ mod tests {
 
   #[test]
   fn can_rasterize_and_scale() {
-    let svg = SvgImage::parse_file("examples/spiral.svg", Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(2.0).unwrap();
 
     assert_eq!(image.dimensions(), (512, 512));

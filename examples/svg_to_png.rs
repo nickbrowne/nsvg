@@ -2,10 +2,11 @@ extern crate nsvg;
 extern crate image;
 
 use std::env;
+use std::path::Path;
 
 fn main() {
   // Load the SVG data
-  let svg = nsvg::parse_file("examples/spiral.svg", nsvg::Units::Pixel, 96.0).unwrap();
+  let svg = nsvg::parse_file(Path::new("examples/spiral.svg"), nsvg::Units::Pixel, 96.0).unwrap();
 
   // Rasterize the loaded SVG and return an RgbaImage
   let image = svg.rasterize(2.0).unwrap();
