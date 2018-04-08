@@ -1,91 +1,269 @@
-mod bindings {
-  #![allow(dead_code)]
-  #![allow(non_snake_case)]
-  #![allow(non_camel_case_types)]
-  #![allow(non_upper_case_globals)]
-  include!("bindings.rs");
-}
+#![allow(dead_code)]
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(non_upper_case_globals)]
+mod bindings;
 
 extern crate image;
+#[cfg(test)]
+extern crate tempfile;
 
 use std::ffi::CString;
-
-use bindings::NSVGimage;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::path::Path;
 
 const BYTES_PER_PIXEL: usize = 4;
 
-pub fn parse_file(filename: &str, units: &str, dpi: f32) -> *mut NSVGimage {
-  use bindings::nsvgParseFromFile;
+#[derive(Debug)]
+pub enum Error {
+  IoError(std::io::Error),
+  NulError(std::ffi::NulError),
+  ParseError,
+  MallocError,
+  RasterizeError,
+}
 
-  let filename_chars = CString::new(filename).unwrap();
-  let unit_chars = CString::new(units).unwrap();
+impl From<std::ffi::NulError> for Error {
+    fn from(error: std::ffi::NulError) -> Self {
+        Error::NulError(error)
+    }
+}
 
-  unsafe {
-    nsvgParseFromFile(filename_chars.as_ptr(), unit_chars.as_ptr(), dpi)
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Error::IoError(error)
+    }
+}
+
+impl std::error::Error for Error {
+  fn description(&self) -> &str {
+    match *self {
+      Error::IoError(ref e) => e.description(),
+      Error::NulError(ref e) => e.description(),
+      Error::ParseError => "An unknown parsing error",
+      Error::MallocError => "Failed to allocate memory",
+      Error::RasterizeError => "Failed to rasterize SVG",
+    }
   }
 }
 
-pub fn rasterize(image: *mut NSVGimage, scale: f32) -> image::RgbaImage {
-  use bindings::nsvgCreateRasterizer;
-  use bindings::nsvgRasterize;
-
-  let width = unsafe { (*image).width * scale } as usize;
-  let height = unsafe { (*image).height * scale } as usize;
-  let capacity = BYTES_PER_PIXEL * width * height;
-  let mut dst = Vec::with_capacity(capacity);
-  let stride = width * BYTES_PER_PIXEL;
-
-  unsafe {
-    // Not sure if we care about reusing this or not...
-    let r = nsvgCreateRasterizer();
-
-    nsvgRasterize(      // Rasterizes SVG image, returns RGBA image (non-premultiplied alpha)
-      r,                //   r - pointer to rasterizer context
-      image,            //   image - pointer to image to rasterize
-      0.0, 0.0,         //   tx,ty - image offset (applied after scaling)
-      scale,            //   scale - image scale
-      dst.as_mut_ptr(), //   dst - pointer to destination image data, 4 bytes per pixel (RGBA)
-      width as i32,     //   w - width of the image to render
-      height as i32,    //   h - height of the image to render
-      stride as i32     //   stride - number of bytes per scaleline in the destination buffer
-    );
-
-    // Need to manually set the length of the vector to match the data that's been put in it
-    dst.set_len(capacity);
+impl std::fmt::Display for Error {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    match *self {
+      Error::IoError(ref e) => e.fmt(f),
+      Error::NulError(ref e) => e.fmt(f),
+      Error::ParseError => write!(f, "An unknown parsing error"),
+      Error::MallocError => write!(f, "Failed to allocate memory"),
+      Error::RasterizeError => write!(f, "Failed to rasterize SVG"),
+    }
   }
-
-  image::RgbaImage::from_raw(width as u32, height as u32, dst).unwrap()
 }
 
+pub enum Units {
+  Pixel,
+  Point,
+  Percent,
+  Millimeter,
+  Centimeter,
+  Inch,
+}
+
+impl Units {
+  fn as_c_str(&self) -> *const std::os::raw::c_char {
+    match *self {
+      Units::Pixel => b"px\0",
+      Units::Point => b"pt\0",
+      Units::Percent => b"pc\0",
+      Units::Millimeter => b"mm\0",
+      Units::Centimeter => b"cm\0",
+      Units::Inch => b"in\0",
+    }.as_ptr() as *const std::os::raw::c_char
+  }
+}
+
+pub struct SvgImage {
+  image: *mut bindings::NSVGimage
+}
+
+impl SvgImage {
+  pub fn parse_file(svg_path: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+    let file = File::open(svg_path)?;
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = Vec::new();
+    buf_reader.read_to_end(&mut contents)?;
+
+    let svg_c_string = CString::new(contents)?.into_raw();
+
+    let image = unsafe {
+      let image = bindings::nsvgParse(svg_c_string, units.as_c_str(), dpi);
+      CString::from_raw(svg_c_string);
+      image
+    };
+
+    if image.is_null() {
+      Err(Error::ParseError)
+    } else {
+      Ok(SvgImage { image })
+    }
+  }
+
+  pub fn rasterize(&self, scale: f32) -> Result<image::RgbaImage, Error> {
+    let rasterizer = SVGRasterizer::new()?;
+
+    rasterizer.rasterize(self, scale)
+  }
+
+  pub fn width(&self) -> f32 {
+    if self.image.is_null() {
+      panic!("NSVGimage pointer is unexpectedly null!");
+    } else {
+      unsafe { (*self.image).width }
+    }
+  }
+
+  pub fn height(&self) -> f32 {
+    if self.image.is_null() {
+      panic!("NSVGimage pointer is unexpectedly null!");
+    } else {
+      unsafe { (*self.image).height }
+    }
+  }
+}
+
+impl Drop for SvgImage {
+  fn drop(&mut self) {
+    if !self.image.is_null() {
+      unsafe { bindings::nsvgDelete(self.image) };
+      self.image = std::ptr::null_mut();
+    }
+  }
+}
+
+pub fn parse_file(filename: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+  SvgImage::parse_file(filename, units, dpi)
+}
+
+struct SVGRasterizer {
+  rasterizer: *mut bindings::NSVGrasterizer
+}
+
+impl SVGRasterizer {
+  fn new() -> Result<SVGRasterizer, Error> {
+    let rasterizer = unsafe { bindings::nsvgCreateRasterizer() };
+
+    if rasterizer.is_null() {
+      Err(Error::MallocError)
+    } else {
+      Ok(SVGRasterizer { rasterizer })
+    }
+  }
+
+  fn rasterize(&self, image: &SvgImage, scale: f32) -> Result<image::RgbaImage, Error> {
+    let width = (image.width() * scale) as usize;
+    let height = (image.height() * scale) as usize;
+    let capacity = BYTES_PER_PIXEL * width * height;
+    let mut dst = Vec::with_capacity(capacity);
+    let stride = width * BYTES_PER_PIXEL;
+
+    unsafe {
+      bindings::nsvgRasterize(      // Rasterizes SVG image, returns RGBA image (non-premultiplied alpha)
+        self.rasterizer,  //   rasterizer - pointer to rasterizer context
+        image.image,      //   image - pointer to image to rasterize
+        0.0, 0.0,         //   tx,ty - image offset (applied after scaling)
+        scale,            //   scale - image scale
+        dst.as_mut_ptr(), //   dst - pointer to destination image data, 4 bytes per pixel (RGBA)
+        width as i32,     //   w - width of the image to render
+        height as i32,    //   h - height of the image to render
+        stride as i32     //   stride - number of bytes per scaleline in the destination buffer
+      );
+
+      // Need to manually set the length of the vector to match the data that's been put in it
+      dst.set_len(capacity);
+    }
+
+    image::RgbaImage::from_raw(width as u32, height as u32, dst)
+      .ok_or(Error::RasterizeError)
+  }
+}
+
+impl Drop for SVGRasterizer {
+  fn drop(&mut self) {
+    if !self.rasterizer.is_null() {
+      unsafe { bindings::nsvgDeleteRasterizer(self.rasterizer) };
+      self.rasterizer = std::ptr::null_mut();
+    }
+  }
+}
 
 #[cfg(test)]
 mod tests {
   use super::*;
 
+  use std::fs::copy;
+  use std::io::Write;
+  use tempfile::{NamedTempFile, tempdir};
+
   #[test]
   fn can_parse_file() {
-    let svg = parse_file("examples/spiral.svg", "px", 96.0);
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
 
-    unsafe {
-      assert_eq!((*svg).width, 256.0);
-      assert_eq!((*svg).height, 256.0);
-    }
+    assert_eq!(svg.width(), 256.0);
+    assert_eq!(svg.height(), 256.0);
+  }
+
+  #[test]
+  fn can_parse_file_at_non_ascii_path() {
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("spìral.svg");
+    copy(Path::new("examples/spiral.svg"), &path).unwrap();
+
+    let svg = SvgImage::parse_file(&path, Units::Pixel, 96.0).unwrap();
+
+    assert_eq!(svg.width(), 256.0);
+    assert_eq!(svg.height(), 256.0);
+  }
+
+  #[test]
+  fn error_when_parsing_an_svg_file_containing_nul() {
+    let mut file = NamedTempFile::new().unwrap();
+    writeln!(file, "\0").unwrap();
+
+    let svg = SvgImage::parse_file(file.path(), Units::Pixel, 96.0);
+
+    let is_nul_error = match svg {
+      Err(Error::NulError(_)) => true,
+      _ => false,
+    };
+
+    assert!(is_nul_error);
+  }
+
+  #[test]
+  fn error_when_parsing_a_file_path_that_does_not_exist() {
+    let svg = SvgImage::parse_file(Path::new("examples/missing.svg"), Units::Pixel, 96.0);
+
+    let is_parse_error = match svg {
+      Err(Error::IoError(_)) => true,
+      _ => false,
+    };
+
+    assert!(is_parse_error);
   }
 
   #[test]
   fn can_rasterize() {
-    let svg = parse_file("examples/spiral.svg", "px", 96.0);
-    let image = rasterize(svg, 1.0);
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let image = svg.rasterize(1.0).unwrap();
 
     assert_eq!(image.dimensions(), (256, 256));
   }
 
   #[test]
   fn can_rasterize_and_scale() {
-    let svg = parse_file("examples/spiral.svg", "px", 96.0);
-    let image = rasterize(svg, 2.0);
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let image = svg.rasterize(2.0).unwrap();
 
     assert_eq!(image.dimensions(), (512, 512));
   }
 }
-
