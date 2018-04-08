@@ -1,4 +1,4 @@
-# nsvg [![Build Status](https://travis-ci.org/nickbrowne/nsvg.svg?branch=master)](https://travis-ci.org/nickbrowne/nsvg)
+# nsvg [![Build Status](https://travis-ci.org/nickbrowne/nsvg.svg?branch=master)](https://travis-ci.org/nickbrowne/nsvg) [![Build status](https://ci.appveyor.com/api/projects/status/nr4jsaibmh5i3fxw/branch/master?svg=true)](https://ci.appveyor.com/project/nickbrowne/nsvg/branch/master) [![Crates.io](https://img.shields.io/crates/v/nsvg.svg)](https://crates.io/crates/nsvg)
 
 A friendly Rust wrapper around the excellent NanoSVG C library. Offering simple SVG parsing and rasterizing.
 
