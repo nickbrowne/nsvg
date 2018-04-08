@@ -20,3 +20,4 @@ cc = "1.0"
 
 [badges]
 travis-ci = { repository = "nickbrowne/nsvg", branch = "master" }
+appveyor = { repository = "nickbrowne/nsvg", branch = "master" }
