@@ -1,3 +1,11 @@
+## 0.4.0
+ - Fix memory leak [#1](https://github.com/nickbrowne/nsvg/pull/1)
+ - More idiomatic error handling [#1](https://github.com/nickbrowne/nsvg/pull/1)
+ - Constrain units with an enum [#1](https://github.com/nickbrowne/nsvg/pull/1)
+ - Add `width()` and `height()` to `SvgImage` [#1](https://github.com/nickbrowne/nsvg/pull/1)
+ - Add CI for Windows
+ - Improved documentation
+
 ## 0.3.2
  - Add CI badge to Cargo.toml
 
