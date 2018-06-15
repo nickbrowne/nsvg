@@ -28,7 +28,8 @@ fn main() {
 #![allow(non_upper_case_globals)]
 mod bindings;
 
-extern crate image;
+#[cfg(feature = "image")]
+pub extern crate image;
 #[cfg(test)]
 extern crate tempfile;
 
@@ -141,16 +142,54 @@ impl SvgImage {
   }
 
   /**
+   * Loads SVG data from the given SVG text contents.
+   *
+   * # Arguments
+   * - `svg_str` - Text contents of the SVG you want to load
+   * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
+   * - `dpi` - Probably just want `96.0`.
+   */
+  pub fn parse_str(svg_str: &str, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+    let svg_c_string = CString::new(svg_str)?.into_raw();
+
+    let image = unsafe {
+      let image = bindings::nsvgParse(svg_c_string, units.as_c_str(), dpi);
+      CString::from_raw(svg_c_string);
+      image
+    };
+
+    if image.is_null() {
+      Err(Error::ParseError)
+    } else {
+      Ok(SvgImage { image })
+    }
+  }
+
+  /**
    * Turns the loaded SVG into an RgbaImage bitmap
    *
    * # Argument
    * - `scale` - The factor the vector will be scaled by when rasterizing.
    * 1.0 is the original size.
    */
+  #[cfg(feature = "image")]
   pub fn rasterize(&self, scale: f32) -> Result<image::RgbaImage, Error> {
     let rasterizer = SVGRasterizer::new()?;
 
     rasterizer.rasterize(self, scale)
+  }
+
+  /**
+   * Turns the loaded SVG into raw RGBA array data, along with width and height information.
+   *
+   * # Argument
+   * - `scale` - The factor the vector will be scaled by when rasterizing.
+   * 1.0 is the original size.
+   */
+  pub fn rasterize_to_raw_rgba(&self, scale: f32) -> Result<(u32, u32, Vec<u8>), Error> {
+    let rasterizer = SVGRasterizer::new()?;
+
+    rasterizer.rasterize_to_raw_rgba(self, scale)
   }
 
   /**
@@ -189,12 +228,24 @@ impl Drop for SvgImage {
  * Loads SVG data from a file at the given `Path`.
  *
  * # Arguments
- * - `svg_path` - Path to the SVG you want to load
+ * - `svg_path` - Text contents of the SVG you want to load
  * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
  * - `dpi` - Probably just want `96.0`.
  */
 pub fn parse_file(filename: &Path, units: Units, dpi: f32) -> Result<SvgImage, Error> {
   SvgImage::parse_file(filename, units, dpi)
+}
+
+/**
+ * Loads SVG data from the given SVG text contents.
+ *
+ * # Arguments
+ * - `svg_str` - Path to the SVG you want to load
+ * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
+ * - `dpi` - Probably just want `96.0`.
+ */
+pub fn parse_str(svg_str: &str, units: Units, dpi: f32) -> Result<SvgImage, Error> {
+  SvgImage::parse_str(svg_str, units, dpi)
 }
 
 struct SVGRasterizer {
@@ -212,7 +263,15 @@ impl SVGRasterizer {
     }
   }
 
+  #[cfg(feature = "image")]
   fn rasterize(&self, image: &SvgImage, scale: f32) -> Result<image::RgbaImage, Error> {
+    let (width, height, raw) = self.rasterize_to_raw_rgba(image, scale)?;
+
+    image::RgbaImage::from_raw(width, height, raw)
+      .ok_or(Error::RasterizeError)
+  }
+
+  fn rasterize_to_raw_rgba(&self, image: &SvgImage, scale: f32) -> Result<(u32, u32, Vec<u8>), Error> {
     let width = (image.width() * scale) as usize;
     let height = (image.height() * scale) as usize;
     let capacity = BYTES_PER_PIXEL * width * height;
@@ -235,8 +294,7 @@ impl SVGRasterizer {
       dst.set_len(capacity);
     }
 
-    image::RgbaImage::from_raw(width as u32, height as u32, dst)
-      .ok_or(Error::RasterizeError)
+    Ok((width as u32, height as u32, dst))
   }
 }
 
@@ -260,6 +318,14 @@ mod tests {
   #[test]
   fn can_parse_file() {
     let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+
+    assert_eq!(svg.width(), 256.0);
+    assert_eq!(svg.height(), 256.0);
+  }
+
+  #[test]
+  fn can_parse_str() {
+    let svg = SvgImage::parse_str(include_str!("../examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
 
     assert_eq!(svg.width(), 256.0);
     assert_eq!(svg.height(), 256.0);
@@ -305,6 +371,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(feature = "image")]
   fn can_rasterize() {
     let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(1.0).unwrap();
@@ -313,6 +380,15 @@ mod tests {
   }
 
   #[test]
+  fn can_rasterize_to_raw_rgba() {
+    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let (width, height, _raw_rgba) = svg.rasterize_to_raw_rgba(1.0).unwrap();
+
+    assert_eq!((width, height), (256, 256));
+  }
+
+  #[test]
+  #[cfg(feature = "image")]
   fn can_rasterize_and_scale() {
     let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(2.0).unwrap();
