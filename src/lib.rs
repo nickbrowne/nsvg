@@ -228,7 +228,7 @@ impl Drop for SvgImage {
  * Loads SVG data from a file at the given `Path`.
  *
  * # Arguments
- * - `svg_path` - Text contents of the SVG you want to load
+ * - `svg_path` - Path to the SVG you want to load
  * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
  * - `dpi` - Probably just want `96.0`.
  */
@@ -240,7 +240,7 @@ pub fn parse_file(filename: &Path, units: Units, dpi: f32) -> Result<SvgImage, E
  * Loads SVG data from the given SVG text contents.
  *
  * # Arguments
- * - `svg_str` - Path to the SVG you want to load
+ * - `svg_str` - Text contents of the SVG you want to load
  * - `units` - The length unit identifier, you probably just want `nsvg::Units::Pixel`
  * - `dpi` - Probably just want `96.0`.
  */
