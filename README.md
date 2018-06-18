@@ -16,7 +16,15 @@ Include `nsvg` in your `Cargo.toml` dependencies.
 
 ```toml
 [dependencies]
-nsvg = "0.4.0"
+nsvg = "0.5.0"
+```
+
+To include `nsvg` without the `image` dependency, add it to your `Cargo.toml` without default dependencies.
+
+```toml
+[dependencies.nsvg]
+version = "0.5.0"
+default-features = false
 ```
 
 Now you can parse and rasterize SVGs. Use the scale argument to produce larger or smaller rasterised images. The aspect ratio will remain the same.

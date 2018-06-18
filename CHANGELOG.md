@@ -1,3 +1,9 @@
+## 0.5.0
+ - Make `image` a default, but optional crate
+ - Increment `image` version to 0.19.0
+ - Add `rasterize_to_raw_rgba` for use when `image` is not included
+ - Add `parse_str` for parsing SVG images from memory
+
 ## 0.4.0
  - Fix memory leak [#1](https://github.com/nickbrowne/nsvg/pull/1)
  - More idiomatic error handling [#1](https://github.com/nickbrowne/nsvg/pull/1)
