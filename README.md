@@ -48,7 +48,7 @@ extern crate nsvg;
 use std::path::Path;
 
 fn main() {
-  let path = Path::new("examples/spiral.svg");
+  let path = Path::new("examples/example.svg");
 
   // Load and parse the svg
   let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
@@ -79,10 +79,14 @@ There is one provided example, which you can run with the following command:
 cargo run --example svg_to_png
 ```
 
-This will convert the `spiral.svg` vector into a PNG. The PNG will be written to the working directory as `spiral_output.png`.
+This will convert the `example.svg` vector into a PNG. The PNG will be written to the working directory as `example_output.png`.
 
 ## License
 
 NanoSVG is licensed under [zlib license](lib/LICENSE.txt)
+
+Sutte Hakkun logo is drawn by [Nico Vliek](https://www.behance.net/gallery/63535513/300-Super-Nintendo-Logos-Fully-Remastered), and is a registered trademark of Nintendo. Used for demonstration purposes only.
+
+Mr Disk is drawn by [Eoin Stanley](http://www.eoinstanley.com/nintendo/index.htm), and is a registered trademark of Nintendo. Used for demonstration purposes only.
 
 Anything else is MIT

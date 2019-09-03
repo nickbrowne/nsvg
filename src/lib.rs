@@ -10,7 +10,7 @@ extern crate nsvg;
 use std::path::Path;
 
 fn main() {
-  let path = Path::new("examples/spiral.svg");
+  let path = Path::new("examples/example.svg");
 
   // Load and parse the svg
   let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
@@ -317,7 +317,7 @@ mod tests {
 
   #[test]
   fn can_parse_file() {
-    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/example.svg"), Units::Pixel, 96.0).unwrap();
 
     assert_eq!(svg.width(), 256.0);
     assert_eq!(svg.height(), 256.0);
@@ -325,7 +325,7 @@ mod tests {
 
   #[test]
   fn can_parse_str() {
-    let svg = SvgImage::parse_str(include_str!("../examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_str(include_str!("../examples/example.svg"), Units::Pixel, 96.0).unwrap();
 
     assert_eq!(svg.width(), 256.0);
     assert_eq!(svg.height(), 256.0);
@@ -335,7 +335,7 @@ mod tests {
   fn can_parse_file_at_non_ascii_path() {
     let dir = tempdir().unwrap();
     let path = dir.path().join("spìral.svg");
-    copy(Path::new("examples/spiral.svg"), &path).unwrap();
+    copy(Path::new("examples/example.svg"), &path).unwrap();
 
     let svg = SvgImage::parse_file(&path, Units::Pixel, 96.0).unwrap();
 
@@ -373,7 +373,7 @@ mod tests {
   #[test]
   #[cfg(feature = "image")]
   fn can_rasterize() {
-    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/example.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(1.0).unwrap();
 
     assert_eq!(image.dimensions(), (256, 256));
@@ -381,7 +381,7 @@ mod tests {
 
   #[test]
   fn can_rasterize_to_raw_rgba() {
-    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/example.svg"), Units::Pixel, 96.0).unwrap();
     let (width, height, _raw_rgba) = svg.rasterize_to_raw_rgba(1.0).unwrap();
 
     assert_eq!((width, height), (256, 256));
@@ -390,7 +390,7 @@ mod tests {
   #[test]
   #[cfg(feature = "image")]
   fn can_rasterize_and_scale() {
-    let svg = SvgImage::parse_file(Path::new("examples/spiral.svg"), Units::Pixel, 96.0).unwrap();
+    let svg = SvgImage::parse_file(Path::new("examples/example.svg"), Units::Pixel, 96.0).unwrap();
     let image = svg.rasterize(2.0).unwrap();
 
     assert_eq!(image.dimensions(), (512, 512));
