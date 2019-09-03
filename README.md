@@ -16,14 +16,14 @@ Include `nsvg` in your `Cargo.toml` dependencies.
 
 ```toml
 [dependencies]
-nsvg = "0.5.0"
+nsvg = "0.5.1"
 ```
 
 To include `nsvg` without the `image` dependency, add it to your `Cargo.toml` without default dependencies.
 
 ```toml
 [dependencies.nsvg]
-version = "0.5.0"
+version = "0.5.1"
 default-features = false
 ```
 

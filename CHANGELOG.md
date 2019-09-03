@@ -1,3 +1,7 @@
+## 0.5.1
+ - Improved documentation
+ - Changed example to better demonstrate capabilties
+
 ## 0.5.0
  - Make `image` a default, but optional crate
  - Increment `image` version to 0.19.0
