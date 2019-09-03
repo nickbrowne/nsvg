@@ -6,7 +6,7 @@ Offers a simple way to parse and rasterize SVG, at whichever scale you want. It 
 
 NanoSVG supports a wide range of SVG features, with most of the vector elements fully supported.
 
-The rasterizer runs entirely on the CPU and has no external dependencies. The quality will be fairly equivalent to exporting a bitmap from Inkscape. The raserizer is based on the one used by `stb_truetype`, all rasters will be anti-aliased. You can read more about the `stb_truetype` rasterizer [here](https://nothings.org/gamedev/rasterize/).
+The rasterizer runs entirely on the CPU and has no external dependencies. The quality will be fairly equivalent to exporting a bitmap from Inkscape. The rasterizer is based on the one in `stb_truetype`, all rasters will be anti-aliased. You can read more about it [here](https://nothings.org/gamedev/rasterize/).
 
 There are faster GPU based solutions to rendering vector graphics out there, but the simplicity of NanoSVG and it's lack of dependencies is a huge benefit, and should run just fine cross platform.
 
