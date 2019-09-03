@@ -6,12 +6,6 @@ Offers a simple way to parse and rasterize SVG, at whichever scale you want. It 
 
 NanoSVG supports a wide range of SVG features, with most of the vector elements fully supported.
 
-Some features are excluded:
- - Plain text elements are not supported, although text can simply be converted to a path and it will work just fine
- - Embedded bitmap images are ignored
- - Scripts are ignored
- - Animations are ignored
-
 The rasterizer runs entirely on the CPU and has no external dependencies. The quality will be fairly equivalent to exporting a bitmap from Inkscape. The raserizer is based on the one used by `stb_truetype`, all rasters will be anti-aliased. You can read more about the `stb_truetype` rasterizer [here](https://nothings.org/gamedev/rasterize/).
 
 There are faster GPU based solutions to rendering vector graphics, but the simplicity of NanoSVG and it's lack of dependencies is a huge benefit, and should run just fine cross platform.
@@ -59,6 +53,18 @@ fn main() {
 }
 
 ```
+
+## Unsupported SVG elements
+
+As it is mostly intended to be used for parsing and rasterising vector graphics, some SVG features are not supported by nsvg:
+
+ - Text elements are ignored, although text can simply be converted to a path and it will work just fine
+
+ - Embedded bitmap images are ignored
+
+ - Scripts are ignored
+
+ - Animations are ignored
 
 ## Developing
 
