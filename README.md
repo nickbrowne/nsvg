@@ -50,7 +50,7 @@ fn main() {
 
 ## Unsupported SVG elements
 
-As it is mostly intended to be used for parsing and rasterising vector graphics, some SVG features are not supported by nsvg:
+As it is mostly intended to be used for parsing and rasterizing vector graphics, some SVG features are not supported by nsvg:
 
  - Text elements are ignored, although text can simply be converted to a path and it will work just fine
 
