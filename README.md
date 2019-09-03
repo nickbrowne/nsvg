@@ -1,10 +1,22 @@
 # nsvg [![Build Status](https://travis-ci.org/nickbrowne/nsvg.svg?branch=master)](https://travis-ci.org/nickbrowne/nsvg) [![Build status](https://ci.appveyor.com/api/projects/status/nr4jsaibmh5i3fxw/branch/master?svg=true)](https://ci.appveyor.com/project/nickbrowne/nsvg/branch/master) [![Crates.io](https://img.shields.io/crates/v/nsvg.svg)](https://crates.io/crates/nsvg)
 
-A friendly Rust wrapper around the excellent NanoSVG C library. Offering simple SVG parsing and rasterizing.
+A friendly Rust wrapper around the excellent NanoSVG C library.
 
-Does not provide all the functionality of NanoSVG yet. Just the bare minimum to create scaled rasters of SVGs.
+Offers a simple way to parse and rasterize SVG, at whichever scale you want. It was written as a convenient way to have scaled UI elements in video games that are suited to the user's selected resolution, but can also be used for simple file conversions.
 
-Like NanoSVG, the rasteriser only renders flat filled shapes. It is not particularly fast or accurate, but it is a simple way to bake vector graphics into textures.
+NanoSVG supports a wide range of SVG features, with most of the vector elements fully supported.
+
+Some features are excluded:
+ - Plain text elements are not supported, although text can simply be converted to a path and it will work just fine
+ - Embedded bitmap images are ignored
+ - Scripts are ignored
+ - Animations are ignored
+
+The rasterizer runs entirely on the CPU and has no external dependencies. The quality will be fairly equivalent to exporting a bitmap from Inkscape. The raserizer is based on the one used by `stb_truetype`, all rasters will be anti-aliased. You can read more about the `stb_truetype` rasterizer [here](https://nothings.org/gamedev/rasterize/).
+
+There are faster GPU based solutions to rendering vector graphics, but the simplicity of NanoSVG and it's lack of dependencies is a huge benefit, and should run just fine cross platform.
+
+If you encounter something that does not rasterize correctly, try converting it to a path first.
 
 https://github.com/memononen/nanosvg
 
@@ -27,9 +39,8 @@ version = "0.5.0"
 default-features = false
 ```
 
-Now you can parse and rasterize SVGs. Use the scale argument to produce larger or smaller rasterised images. The aspect ratio will remain the same.
+Now you can parse and rasterize SVGs. Use the scale argument to produce larger or smaller rasterised images. The aspect ratio will always remain the same.
 
-This can be useful to create rasters to suit high resolution displays.
 
 ```rust
 extern crate nsvg;
