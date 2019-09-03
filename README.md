@@ -8,13 +8,7 @@ NanoSVG supports a wide range of SVG features, with most of the vector elements 
 
 The rasterizer runs entirely on the CPU and has no external dependencies. The quality will be fairly equivalent to exporting a bitmap from Inkscape. The raserizer is based on the one used by `stb_truetype`, all rasters will be anti-aliased. You can read more about the `stb_truetype` rasterizer [here](https://nothings.org/gamedev/rasterize/).
 
-There are faster GPU based solutions to rendering vector graphics, but the simplicity of NanoSVG and it's lack of dependencies is a huge benefit, and should run just fine cross platform.
-
-If you encounter something that does not rasterize correctly, try converting it to a path first.
-
-https://github.com/memononen/nanosvg
-
-https://github.com/rezrov/libnanosvg
+There are faster GPU based solutions to rendering vector graphics out there, but the simplicity of NanoSVG and it's lack of dependencies is a huge benefit, and should run just fine cross platform.
 
 ## Usage
 
@@ -66,6 +60,8 @@ As it is mostly intended to be used for parsing and rasterising vector graphics,
 
  - Animations are ignored
 
+If you encounter anything that does not rasterize as you would expect, try converting it to a path first.
+
 ## Developing
 
 By default nsvg will use prebuilt FFI bindings, but you can regenerate them manually by running:
@@ -86,6 +82,12 @@ cargo run --example svg_to_png
 ```
 
 This will convert the `example.svg` vector into a PNG. The PNG will be written to the working directory as `example_output.png`.
+
+## See also
+
+https://github.com/memononen/nanosvg
+
+https://github.com/rezrov/libnanosvg
 
 ## License
 
