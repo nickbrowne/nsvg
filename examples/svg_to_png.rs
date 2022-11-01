@@ -20,6 +20,6 @@ fn main() {
     &image.into_raw(),
     width,
     height,
-    image::ColorType::RGBA(8),
+    image::ColorType::Rgba8,
   ).expect("Failed to save png.");
 }
