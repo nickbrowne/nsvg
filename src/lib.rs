@@ -47,6 +47,7 @@ pub enum Error {
   ParseError,
   MallocError,
   RasterizeError,
+  InvalidDimensions,
 }
 
 impl From<std::ffi::NulError> for Error {
@@ -69,6 +70,7 @@ impl std::error::Error for Error {
       Error::ParseError => "An unknown parsing error",
       Error::MallocError => "Failed to allocate memory",
       Error::RasterizeError => "Failed to rasterize SVG",
+      Error::InvalidDimensions => "Rasterized dimensions are out of range",
     }
   }
 }
@@ -81,6 +83,7 @@ impl std::fmt::Display for Error {
       Error::ParseError => write!(f, "An unknown parsing error"),
       Error::MallocError => write!(f, "Failed to allocate memory"),
       Error::RasterizeError => write!(f, "Failed to rasterize SVG"),
+      Error::InvalidDimensions => write!(f, "Rasterized dimensions are out of range"),
     }
   }
 }
@@ -274,6 +277,22 @@ impl SVGRasterizer {
   fn rasterize_to_raw_rgba(&self, image: &SvgImage, scale: f32) -> Result<(u32, u32, Vec<u8>), Error> {
     let width = (image.width() * scale) as usize;
     let height = (image.height() * scale) as usize;
+
+    let max = i32::max_value() as u64;
+    let byte_size = (width as u64)
+      .checked_mul(height as u64)
+      .and_then(|n| n.checked_mul(BYTES_PER_PIXEL as u64));
+    if !scale.is_finite()
+      || scale <= 0.0
+      || width == 0
+      || height == 0
+      || width as u64 > max
+      || height as u64 > max
+      || byte_size.map_or(true, |n| n > max)
+    {
+      return Err(Error::InvalidDimensions);
+    }
+
     let capacity = BYTES_PER_PIXEL * width * height;
     let mut dst = Vec::with_capacity(capacity);
     let stride = width * BYTES_PER_PIXEL;
@@ -394,5 +413,21 @@ mod tests {
     let image = svg.rasterize(2.0).unwrap();
 
     assert_eq!(image.dimensions(), (512, 512));
+  }
+
+  #[test]
+  fn rejects_rasterize_dimensions_overflowing_i32() {
+    let svg = SvgImage::parse_str(
+      "<svg width=\"262144\" height=\"2100\" xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      Units::Pixel,
+      96.0,
+    ).unwrap();
+
+    let is_invalid_dimensions = match svg.rasterize_to_raw_rgba(1.0) {
+      Err(Error::InvalidDimensions) => true,
+      _ => false,
+    };
+
+    assert!(is_invalid_dimensions);
   }
 }
